@@ -35,7 +35,7 @@ import static android.view.View.inflate;
 public class MainActivity extends AppCompatActivity {
     private static String URL = "https://facejam.herokuapp.com/";
     private static String TOKEN = "CHp7Qbdb2rqr";
-    private static String SLACK_ID = "xoxp-56919177042-367411298544-409784546038-41c52850ea78f2d3e6c21851b3564630";
+    private static String SLACK_AUTH_KEY = "xoxp-56919177042-367411298544-409784546038-41c52850ea78f2d3e6c21851b3564630";
     private static String SLACK_BASE_URL = "https://slack.com/api";
 
     private CameraView cameraView;
@@ -227,11 +227,15 @@ public class MainActivity extends AppCompatActivity {
     private SlackUser createSlackUser(String slackId) {
         final SlackUser user = new SlackUser();
         OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(SLACK_BASE_URL + "/users.profile.get")
-                .header("token", slackId)
-                .header("user", slackId)
+        HttpUrl httpUrl = HttpUrl.parse(SLACK_BASE_URL + "/users.profile.get").newBuilder()
+                .addQueryParameter("token", SLACK_AUTH_KEY)
+                .addQueryParameter("user", slackId)
                 .build();
+        Request request = new Request.Builder()
+                .url(httpUrl)
+                .build();
+
+        Log.d("MainActivity", request.toString());
 
         Call call = client.newCall(request);
         call.enqueue(new Callback() {
@@ -243,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String jsonString = response.body().string();
+                Log.d("MainActivity", jsonString);
                 try {
                     JSONObject jsonObject = new JSONObject(jsonString);
                     JSONObject profile = jsonObject.getJSONObject("profile");
@@ -251,7 +256,8 @@ public class MainActivity extends AppCompatActivity {
                     user.setName(name);
                     user.setTitle(title);
                 } catch (Exception e) {
-                    Log.e("MainActivity", "onResponse create slack user");
+                    Log.e("MainActivity", "onResponseError create slack user: " + e.getClass().getCanonicalName());
+                    e.printStackTrace();
                 }
             }
         });
