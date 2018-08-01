@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "33657609702",
+    "firebase_url": "https://facecam-badfb.firebaseio.com",
+    "project_id": "facecam-badfb",
+    "storage_bucket": "facecam-badfb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33657609702:android:10ef1817f11a486b",
+        "android_client_info": {
+          "package_name": "com.example.veeramanih.facecam"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "33657609702-sjvbq58678n03fbjiog40anerpn4dqkc.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.veeramanih.facecam",
+            "certificate_hash": "061c65e01493cbad07468ab7dc4d70c09880bfb9"
+          }
+        },
+        {
+          "client_id": "33657609702-eull00ca5uebhbqv6a9vt3kvifggk94a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASLRkYZsf78DGGqUIHbw2Df12nRRMIXNg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "33657609702-eull00ca5uebhbqv6a9vt3kvifggk94a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
