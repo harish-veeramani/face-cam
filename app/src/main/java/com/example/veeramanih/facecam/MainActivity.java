@@ -37,7 +37,7 @@ import java.util.concurrent.TimeUnit;
 import static android.view.View.inflate;
 
 public class MainActivity extends AppCompatActivity {
-    private static String URL = "https://vimeo-facejam.herokuapp.com/";
+    private static String URL = "http://192.168.145.27:6000";
     private static String TOKEN = "CHp7Qbdb2rqr";
     private static String SLACK_AUTH_KEY = "xoxp-56919177042-367411298544-409784546038-41c52850ea78f2d3e6c21851b3564630";
     private static String SLACK_BASE_URL = "https://slack.com/api";
@@ -49,7 +49,14 @@ public class MainActivity extends AppCompatActivity {
     private FaceBoundsOverlay faceBoundsOverlay;
     private BottomSheetDialog dialog;
     private ProgressBar progressBar;
+    private TextView nameTextView;
     private TextView titleTextView;
+    private TextView emailTextView;
+    private Button phoneButton;
+    private Button vimeoButton;
+    private Button twitterButton;
+    private Button instagramButton;
+    private Button githubButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +73,15 @@ public class MainActivity extends AppCompatActivity {
         final View view = inflate(this, R.layout.info_bottom_sheet, null);
         dialog.setContentView(view);
 
+        nameTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_name_text_view);
         progressBar = view.findViewById(R.id.loading);
         titleTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_title_text_view);
+        emailTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_email_text_view);
+        phoneButton = view.findViewById(R.id.phone);
+        vimeoButton = view.findViewById(R.id.vimeo);
+        twitterButton = view.findViewById(R.id.twitter);
+        instagramButton = view.findViewById(R.id.instagram);
+        githubButton = view.findViewById(R.id.github);
 
 
         cameraView.mapGesture(Gesture.PINCH, GestureAction.ZOOM);
@@ -85,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onBitmapReady(Bitmap bitmap) {
                         Log.d("MainActivity", "ready to send image");
                         //saveImage(bitmap, "Test");
+                        resetDialog();
                         dialog.show();
                         sendImage(createFileFromBitmap(bitmap), view);
                     }
@@ -109,14 +124,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
 
-//        capture.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                cameraView.captureSnapshot();
-//                Log.d("MainActivity", "tapped");
-//            }
-//        });
+    private void resetDialog() {
+        nameTextView.setVisibility(View.INVISIBLE);
+        titleTextView.setVisibility(View.INVISIBLE);
+        emailTextView.setVisibility(View.INVISIBLE);
+        phoneButton.setVisibility(View.INVISIBLE);
+        vimeoButton.setVisibility(View.INVISIBLE);
+        twitterButton.setVisibility(View.INVISIBLE);
+        instagramButton.setVisibility(View.INVISIBLE);
+        githubButton.setVisibility(View.INVISIBLE);
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -160,7 +179,6 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             final MediaType MEDIA_TYPE_JPEG = MediaType.parse("image/jpeg");
-            final MediaType MEDIA_TYPE_BMP = MediaType.parse("image/bmp");
 
             RequestBody req = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
@@ -211,18 +229,10 @@ public class MainActivity extends AppCompatActivity {
 
                                             progressBar.setVisibility(View.GONE);
 
-                                            TextView nameTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_name_text_view);
                                             if (user.getName() != null) {
                                                 nameTextView.setText(user.getName());
                                                 nameTextView.setVisibility(View.VISIBLE);
                                             }
-
-                                            TextView emailTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_email_text_view);
-                                            Button phoneButton = view.findViewById(R.id.phone);
-                                            Button vimeoButton = view.findViewById(R.id.vimeo);
-                                            Button twitterButton = view.findViewById(R.id.twitter);
-                                            Button instagramButton = view.findViewById(R.id.instagram);
-                                            Button githubButton = view.findViewById(R.id.github);
 
                                             titleTextView.setText(user.getTitle());
                                             titleTextView.setVisibility(View.VISIBLE);
@@ -289,10 +299,6 @@ public class MainActivity extends AppCompatActivity {
                                                 });
                                                 githubButton.setVisibility(View.VISIBLE);
                                             }
-
-
-                                            Log.d("MainActivity", "Opening popup...");
-                                            //dialog.show();
                                         }
                                     });
                                 }
@@ -445,54 +451,4 @@ public class MainActivity extends AppCompatActivity {
 
         return f;
     }
-
-//    private static class ImageSenderTask extends AsyncTask<File, Void, JSONObject> {
-//
-//        @Override
-//        protected JSONObject doInBackground(File... files) {
-//            try {
-//                final MediaType MEDIA_TYPE_JPEG = MediaType.parse("image/jpeg");
-//                final MediaType MEDIA_TYPE_BMP = MediaType.parse("image/bmp");
-//
-//                RequestBody req = new MultipartBody.Builder()
-//                        .setType(MultipartBody.FORM)
-//                        .addFormDataPart("file", "face.jpg", RequestBody.create(MEDIA_TYPE_JPEG, files[0]))
-//                        .addFormDataPart("token", token)
-//                        .build();
-//
-//                Request request = new Request.Builder()
-//                        .url(url)
-//                        .post(req)
-//                        .build();
-//
-//                OkHttpClient client = new OkHttpClient();
-//                Response response = client.newCall(request).execute();
-//
-//                //Log.d("MainActivity", "uploadImage:" + response.body().string());
-//                String string = response.body().string();
-//                JSONObject jsonObject = new JSONObject(string.substring(1, string.length() - 1));
-//
-//                return jsonObject;
-//            } catch (UnknownHostException | UnsupportedEncodingException e) {
-//                Log.e("MainActivity", "Error: " + e.getLocalizedMessage());
-//            } catch (Exception e) {
-//                Log.e("MainActivity", "Other Error: " + e.getClass().getCanonicalName());
-//                e.printStackTrace();
-//            }
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(JSONObject feed) {
-//            try {
-//                if (feed != null) {
-//                    Log.d("MainActivity", "JSON:\n" + feed.toString(4));
-//                } else {
-//                    Log.d("MainActivity", "feed is NULL");
-//                }
-//            } catch (JSONException e) {
-//                Log.e("MainActivity", "JSON exception");
-//            }
-//        }
-//    }
 }
