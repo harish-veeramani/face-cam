@@ -1,6 +1,8 @@
 package com.example.veeramanih.facecam;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -14,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.firebase.FirebaseApp;
 import com.otaliastudios.cameraview.*;
@@ -22,18 +25,19 @@ import husaynhakeem.io.facedetector.FaceDetector;
 import husaynhakeem.io.facedetector.models.Frame;
 import husaynhakeem.io.facedetector.models.Size;
 import okhttp3.*;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 import static android.view.View.inflate;
 
 public class MainActivity extends AppCompatActivity {
-    private static String URL = "https://facejam.herokuapp.com/";
+    private static String URL = "https://vimeo-facejam.herokuapp.com/";
     private static String TOKEN = "CHp7Qbdb2rqr";
     private static String SLACK_AUTH_KEY = "xoxp-56919177042-367411298544-409784546038-41c52850ea78f2d3e6c21851b3564630";
     private static String SLACK_BASE_URL = "https://slack.com/api";
@@ -43,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private ImageView capture;
     private FaceDetector faceDetector;
     private FaceBoundsOverlay faceBoundsOverlay;
+    private BottomSheetDialog dialog;
+    private ProgressBar progressBar;
+    private TextView titleTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +61,18 @@ public class MainActivity extends AppCompatActivity {
         capture = findViewById(R.id.capturePhoto);
         faceBoundsOverlay = findViewById(R.id.face_overlay);
         faceDetector = new FaceDetector(faceBoundsOverlay);
-        cameraView.mapGesture(Gesture.TAP, GestureAction.FOCUS_WITH_MARKER); // Tap to focus!
+
+        dialog = new BottomSheetDialog(this);
+        final View view = inflate(this, R.layout.info_bottom_sheet, null);
+        dialog.setContentView(view);
+
+        progressBar = view.findViewById(R.id.loading);
+        titleTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_title_text_view);
+
+
+        cameraView.mapGesture(Gesture.PINCH, GestureAction.ZOOM);
+        cameraView.mapGesture(Gesture.LONG_TAP, GestureAction.FOCUS_WITH_MARKER);
+        cameraView.mapGesture(Gesture.TAP, GestureAction.CAPTURE); // Tap to focus!
         cameraView.addCameraListener(new CameraListener() {
             @Override
             public void onPictureTaken(byte[] picture) {
@@ -67,7 +85,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onBitmapReady(Bitmap bitmap) {
                         Log.d("MainActivity", "ready to send image");
                         //saveImage(bitmap, "Test");
-                        sendImage(createFileFromBitmap(bitmap));
+                        dialog.show();
+                        sendImage(createFileFromBitmap(bitmap), view);
                     }
                 });
             }
@@ -86,18 +105,18 @@ public class MainActivity extends AppCompatActivity {
                     faceDetector.process(detectorFrame);
                 } catch (Exception e) {
                     Log.d("MainActivity", "Null frame: " + e.getMessage());
-                    e.printStackTrace();
+                    //e.printStackTrace();
                 }
             }
         });
 
-        capture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cameraView.captureSnapshot();
-                Log.d("MainActivity", "tapped");
-            }
-        });
+//        capture.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                cameraView.captureSnapshot();
+//                Log.d("MainActivity", "tapped");
+//            }
+//        });
     }
 
     @Override
@@ -137,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void sendImage(File file) {
+    private void sendImage(File file, final View view) {
 
         try {
             final MediaType MEDIA_TYPE_JPEG = MediaType.parse("image/jpeg");
@@ -155,15 +174,27 @@ public class MainActivity extends AppCompatActivity {
                     .build();
 
             final Handler handler = new Handler(Looper.getMainLooper());
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(20, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .build();
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            titleTextView.setText("Request timed out...");
+                            titleTextView.setVisibility(View.VISIBLE);
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
                     Log.e("MainActivity", "onFailure: " + e.getClass().getCanonicalName());
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(Call call, Response response) {
                     try {
                         JSONObject jsonObject = handleResponse(response);
                         if (jsonObject != null) {
@@ -171,7 +202,99 @@ public class MainActivity extends AppCompatActivity {
                             handler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    openPopup(slackId);
+                                    final SlackUser user = new SlackUser();
+
+                                    createSlackUser(slackId, user, new BottomSheetCallback() {
+                                        @Override
+                                        public void onPopulateUser() {
+                                            Log.d("MainActivity", user.toString());
+
+                                            progressBar.setVisibility(View.GONE);
+
+                                            TextView nameTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_name_text_view);
+                                            if (user.getName() != null) {
+                                                nameTextView.setText(user.getName());
+                                                nameTextView.setVisibility(View.VISIBLE);
+                                            }
+
+                                            TextView emailTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_email_text_view);
+                                            Button phoneButton = view.findViewById(R.id.phone);
+                                            Button vimeoButton = view.findViewById(R.id.vimeo);
+                                            Button twitterButton = view.findViewById(R.id.twitter);
+                                            Button instagramButton = view.findViewById(R.id.instagram);
+                                            Button githubButton = view.findViewById(R.id.github);
+
+                                            titleTextView.setText(user.getTitle());
+                                            titleTextView.setVisibility(View.VISIBLE);
+
+                                            emailTextView.setText(user.getEmail());
+                                            emailTextView.setVisibility(View.VISIBLE);
+
+                                            if (user.getPhoneNumber() != null) {
+                                                phoneButton.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                                                        intent.setData(Uri.parse("tel:" + user.getPhoneNumber()));
+                                                        startActivity(intent);
+                                                    }
+                                                });
+                                                phoneButton.setVisibility(View.VISIBLE);
+                                            }
+
+                                            if (user.getVimeo() != null) {
+                                                vimeoButton.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                                        intent.setData(Uri.parse(user.getVimeo()));
+                                                        startActivity(intent);
+                                                    }
+                                                });
+                                                vimeoButton.setVisibility(View.VISIBLE);
+                                            }
+
+                                            if (user.getTwitter() != null) {
+                                                twitterButton.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                                        intent.setData(Uri.parse(user.getTwitter()));
+                                                        startActivity(intent);
+                                                    }
+                                                });
+                                                twitterButton.setVisibility(View.VISIBLE);
+                                            }
+
+                                            if (user.getInstagram() != null) {
+                                                instagramButton.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                                        intent.setData(Uri.parse(user.getInstagram()));
+                                                        startActivity(intent);
+                                                    }
+                                                });
+                                                instagramButton.setVisibility(View.VISIBLE);
+                                            }
+
+                                            if (user.getGithub() != null) {
+                                                githubButton.setOnClickListener(new View.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(View v) {
+                                                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                                                        intent.setData(Uri.parse(user.getGithub()));
+                                                        startActivity(intent);
+                                                    }
+                                                });
+                                                githubButton.setVisibility(View.VISIBLE);
+                                            }
+
+
+                                            Log.d("MainActivity", "Opening popup...");
+                                            //dialog.show();
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -195,37 +318,22 @@ public class MainActivity extends AppCompatActivity {
             if (jsonString.length() == 2) return null;
             return new JSONObject(jsonString.substring(1, jsonString.length() - 1));
         } catch (Exception e) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    titleTextView.setText("503 Bad Response");
+                    titleTextView.setVisibility(View.VISIBLE);
+                    progressBar.setVisibility(View.GONE);
+                }
+            });
+
             Log.e("MainActivity", e.getClass().getCanonicalName());
         }
         return null;
     }
 
-    private void openPopup(String slackId) {
-        SlackUser user = createSlackUser(slackId);
-        View view = inflate(this, R.layout.info_bottom_sheet, null);
-        final BottomSheetDialog dialog = new BottomSheetDialog(this);
-        dialog.setContentView(view);
-        TextView nameTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_name_text_view);
-        if (user.getName() != null) {
-            nameTextView.setText(user.getName());
-        }
-        TextView infoTextView = view.findViewById(R.id.fragment_bottom_sheet_popup_body_text_view);
-        if (user.getTitle() != null) {
-            infoTextView.setText(user.getTitle());
-        }
-        Button dismiss = view.findViewById(R.id.fragment_bottom_sheet_popup_button);
-        dismiss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
-        Log.d("MainActivity", "Opening popup...");
-        dialog.show();
-    }
-
-    private SlackUser createSlackUser(String slackId) {
-        final SlackUser user = new SlackUser();
+    private void createSlackUser(final String slackId, SlackUser user, final BottomSheetCallback callback) {
+        final SlackUser slackUser = user;
         OkHttpClient client = new OkHttpClient();
         HttpUrl httpUrl = HttpUrl.parse(SLACK_BASE_URL + "/users.profile.get").newBuilder()
                 .addQueryParameter("token", SLACK_AUTH_KEY)
@@ -252,16 +360,61 @@ public class MainActivity extends AppCompatActivity {
                     JSONObject jsonObject = new JSONObject(jsonString);
                     JSONObject profile = jsonObject.getJSONObject("profile");
                     String name = profile.getString("real_name");
-                    String title = profile.getString("title");
-                    user.setName(name);
-                    user.setTitle(title);
+                    slackUser.setName(name);
+                    try {
+                        String title = profile.getString("title");
+                        slackUser.setTitle(title);
+                    } catch (JSONException j) {
+                        slackUser.setTitle(null);
+                    }
+                    try {
+                        String email = profile.getString("email");
+                        slackUser.setEmail(email);
+                    } catch (JSONException j) {
+                        slackUser.setEmail(null);
+                    }
+                    try {
+                        String phone = profile.getString("phone");
+                        slackUser.setPhoneNumber(phone);
+                    } catch (JSONException j) {
+                        slackUser.setPhoneNumber(null);
+                    }
+                    try {
+                        String vimeoURL = profile.getJSONObject("fields").getJSONObject("Xf2BPE86JH").getString("value");
+                        slackUser.setVimeo(vimeoURL);
+                    } catch (JSONException j) {
+                        slackUser.setVimeo(null);
+                    }
+                    try {
+                        String twitterURL = profile.getJSONObject("fields").getJSONObject("Xf2C7ZGVM2").getString("value");
+                        slackUser.setTwitter(twitterURL);
+                    } catch (JSONException j) {
+                        slackUser.setTwitter(null);
+                    }
+                    try {
+                        String instagramURL = profile.getJSONObject("fields").getJSONObject("Xf2C82RLMC").getString("value");
+                        slackUser.setInstagram(instagramURL);
+                    } catch (JSONException j) {
+                        slackUser.setInstagram(null);
+                    }
+                    try {
+                        String githubURL = profile.getJSONObject("fields").getJSONObject("Xf2C8CU71V").getString("value");
+                        slackUser.setGithub(githubURL);
+                    } catch (JSONException j) {
+                        slackUser.setGithub(null);
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            callback.onPopulateUser();
+                        }
+                    });
                 } catch (Exception e) {
                     Log.e("MainActivity", "onResponseError create slack user: " + e.getClass().getCanonicalName());
                     e.printStackTrace();
                 }
             }
         });
-        return user;
     }
 
     private File createFileFromBitmap(Bitmap bmp) {

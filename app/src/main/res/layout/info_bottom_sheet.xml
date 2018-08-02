@@ -1,54 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/colorPrimary"
-    android:minHeight="216dp"
-    android:padding="16dp">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:minHeight="216dp"
+        android:padding="16dp">
 
     <TextView
             android:id="@+id/fragment_bottom_sheet_popup_name_text_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="8dp"
             android:text="Name"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:textSize="24sp"
+            android:visibility="invisible"
+            tools:visibility="visible"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"/>
 
     <TextView
-            android:id="@+id/fragment_bottom_sheet_popup_body_text_view"
-            android:layout_width="match_parent"
+            android:id="@+id/fragment_bottom_sheet_popup_title_text_view"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="12dp"
-            android:layout_marginTop="18dp"
-            android:text="adw"
+            android:layout_marginTop="8dp"
+            android:text="title"
+            android:visibility="invisible"
+            tools:visibility="visible"
             android:textColor="#FFFFFF"
-            android:textSize="12sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_bottom_sheet_popup_name_text_view" />
+            app:layout_constraintTop_toBottomOf="@+id/fragment_bottom_sheet_popup_name_text_view"/>
+
+    <TextView
+            android:id="@+id/fragment_bottom_sheet_popup_email_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="12dp"
+            android:text="email"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/loading" android:layout_marginTop="8dp"/>
+
+
+    <Button android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/ic_phone"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/phone"
+            android:backgroundTint="#36BB3C"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="@+id/github"
+            android:layout_marginStart="8dp" app:layout_constraintEnd_toStartOf="@+id/instagram"
+            app:layout_constraintHorizontal_bias="0.84"/>
+
+    <Button android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/ic_vimeo"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            android:backgroundTint="#85C1E9"
+            android:id="@+id/vimeo"
+            app:layout_constraintStart_toEndOf="@+id/github"
+            android:layout_marginStart="8dp" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintEnd_toStartOf="@+id/phone"
+            android:layout_marginEnd="8dp"/>
 
     <Button
-            android:id="@+id/fragment_bottom_sheet_popup_button"
-            android:layout_width="118dp"
+            android:layout_width="40dp"
             android:layout_height="40dp"
+            android:background="@drawable/ic_twitter"
+            android:backgroundTint="#2C9DF5"
+            android:visibility="invisible"
+            tools:visibility="visible"
             android:layout_marginBottom="8dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginTop="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:text="Dismiss"
-            android:textSize="12sp"
-            android:textColor="#FFFFFF"
-            android:background="#609AFF"
             app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/twitter"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/fragment_bottom_sheet_popup_body_text_view"/>
+            android:layout_marginStart="8dp"/>
+
+    <Button
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            android:background="@drawable/ic_instagram"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#C100FF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/instagram"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"/>
+
+    <Button
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/ic_github"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#000000"
+            android:visibility="invisible"
+            tools:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:id="@+id/github"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toEndOf="@+id/twitter"
+            app:layout_constraintHorizontal_bias="0.11"/>
+
+    <ProgressBar
+            android:id="@+id/loading"
+            android:layout_width="49dp"
+            android:layout_height="45dp"
+            android:indeterminate="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginBottom="8dp"/>
+
+    <!--<Button-->
+    <!--android:id="@+id/fragment_bottom_sheet_popup_button"-->
+    <!--android:layout_width="118dp"-->
+    <!--android:layout_height="40dp"-->
+    <!--android:layout_marginBottom="8dp"-->
+    <!--android:layout_marginStart="12dp"-->
+    <!--android:layout_marginTop="8dp"-->
+    <!--android:clickable="true"-->
+    <!--android:focusable="true"-->
+    <!--android:text="Dismiss"-->
+    <!--android:textSize="12sp"-->
+    <!--android:textColor="#FFFFFF"-->
+    <!--android:background="#609AFF"-->
+    <!--app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent"-->
+    <!--app:layout_constraintTop_toBottomOf="@+id/fragment_bottom_sheet_popup_body_text_view"/>-->
 
 </android.support.constraint.ConstraintLayout>
