@@ -9,13 +9,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.UiThread;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.firebase.FirebaseApp;
@@ -43,8 +41,6 @@ public class MainActivity extends AppCompatActivity {
     private static String SLACK_BASE_URL = "https://slack.com/api";
 
     private CameraView cameraView;
-    private ConstraintLayout rootView;
-    private ImageView capture;
     private FaceDetector faceDetector;
     private FaceBoundsOverlay faceBoundsOverlay;
     private BottomSheetDialog dialog;
@@ -63,9 +59,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         FirebaseApp.initializeApp(this);
         setContentView(R.layout.activity_camera);
-        rootView = findViewById(R.id.root_view);
         cameraView = findViewById(R.id.camera);
-        capture = findViewById(R.id.capturePhoto);
         faceBoundsOverlay = findViewById(R.id.face_overlay);
         faceDetector = new FaceDetector(faceBoundsOverlay);
 
