@@ -243,8 +243,10 @@ public class MainActivity extends AppCompatActivity {
                                                         startActivity(intent);
                                                     }
                                                 });
-                                                phoneButton.setVisibility(View.VISIBLE);
+                                            } else {
+                                                phoneButton.setBackgroundTintList(getResources().getColorStateList(R.color.common_google_signin_btn_text_dark_pressed));
                                             }
+                                            phoneButton.setVisibility(View.VISIBLE);
 
                                             if (user.getVimeo() != null) {
                                                 vimeoButton.setOnClickListener(new View.OnClickListener() {
@@ -255,8 +257,10 @@ public class MainActivity extends AppCompatActivity {
                                                         startActivity(intent);
                                                     }
                                                 });
-                                                vimeoButton.setVisibility(View.VISIBLE);
+                                            } else {
+                                                vimeoButton.setBackgroundTintList(getResources().getColorStateList(R.color.common_google_signin_btn_text_dark_pressed));
                                             }
+                                            vimeoButton.setVisibility(View.VISIBLE);
 
                                             if (user.getTwitter() != null) {
                                                 twitterButton.setOnClickListener(new View.OnClickListener() {
@@ -267,8 +271,10 @@ public class MainActivity extends AppCompatActivity {
                                                         startActivity(intent);
                                                     }
                                                 });
-                                                twitterButton.setVisibility(View.VISIBLE);
+                                            } else {
+                                                twitterButton.setBackgroundTintList(getResources().getColorStateList(R.color.common_google_signin_btn_text_dark_pressed));
                                             }
+                                            twitterButton.setVisibility(View.VISIBLE);
 
                                             if (user.getInstagram() != null) {
                                                 instagramButton.setOnClickListener(new View.OnClickListener() {
@@ -279,8 +285,10 @@ public class MainActivity extends AppCompatActivity {
                                                         startActivity(intent);
                                                     }
                                                 });
-                                                instagramButton.setVisibility(View.VISIBLE);
+                                            } else {
+                                                instagramButton.setBackgroundTintList(getResources().getColorStateList(R.color.common_google_signin_btn_text_dark_pressed));
                                             }
+                                            instagramButton.setVisibility(View.VISIBLE);
 
                                             if (user.getGithub() != null) {
                                                 githubButton.setOnClickListener(new View.OnClickListener() {
@@ -291,8 +299,10 @@ public class MainActivity extends AppCompatActivity {
                                                         startActivity(intent);
                                                     }
                                                 });
-                                                githubButton.setVisibility(View.VISIBLE);
+                                            } else {
+                                                githubButton.setBackgroundTintList(getResources().getColorStateList(R.color.common_google_signin_btn_text_dark_pressed));
                                             }
+                                            githubButton.setVisibility(View.VISIBLE);
                                         }
                                     });
                                 }
