@@ -16,13 +16,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.google.firebase.FirebaseApp;
 import com.otaliastudios.cameraview.*;
+
 import husaynhakeem.io.facedetector.FaceBoundsOverlay;
 import husaynhakeem.io.facedetector.FaceDetector;
 import husaynhakeem.io.facedetector.models.Frame;
 import husaynhakeem.io.facedetector.models.Size;
 import okhttp3.*;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,11 +38,6 @@ import java.util.concurrent.TimeUnit;
 import static android.view.View.inflate;
 
 public class MainActivity extends AppCompatActivity {
-    private static String URL = "http://192.168.145.27:6000";
-    private static String TOKEN = "CHp7Qbdb2rqr";
-    private static String SLACK_AUTH_KEY = "xoxp-56919177042-367411298544-409784546038-41c52850ea78f2d3e6c21851b3564630";
-    private static String SLACK_BASE_URL = "https://slack.com/api";
-
     private CameraView cameraView;
     private FaceDetector faceDetector;
     private FaceBoundsOverlay faceBoundsOverlay;
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
                         //saveImage(bitmap, "Test");
                         resetDialog();
                         dialog.show();
-                        sendImage(createFileFromBitmap(bitmap), view);
+                        sendImage(BitmapUtil.createFileFromBitmap(bitmap));
                     }
                 });
             }
@@ -150,38 +148,18 @@ public class MainActivity extends AppCompatActivity {
         cameraView.destroy();
     }
 
-    private void saveImage(Bitmap finalBitmap, String imageName) {
-
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root);
-        myDir.mkdirs();
-        String fname = "Image-" + imageName + ".jpg";
-        File file = new File(myDir, fname);
-        if (file.exists()) file.delete();
-        Log.i("LOAD", root + fname);
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
-            out.flush();
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void sendImage(File file, final View view) {
-
+    private void sendImage(File file) {
         try {
             final MediaType MEDIA_TYPE_JPEG = MediaType.parse("image/jpeg");
 
             RequestBody req = new MultipartBody.Builder()
                     .setType(MultipartBody.FORM)
                     .addFormDataPart("file", "face.jpg", RequestBody.create(MEDIA_TYPE_JPEG, file))
-                    .addFormDataPart("token", TOKEN)
+                    .addFormDataPart("token", Config.TOKEN)
                     .build();
 
             Request request = new Request.Builder()
-                    .url(URL)
+                    .url(Config.URL)
                     .post(req)
                     .build();
 
@@ -345,8 +323,8 @@ public class MainActivity extends AppCompatActivity {
     private void createSlackUser(final String slackId, SlackUser user, final BottomSheetCallback callback) {
         final SlackUser slackUser = user;
         OkHttpClient client = new OkHttpClient();
-        HttpUrl httpUrl = HttpUrl.parse(SLACK_BASE_URL + "/users.profile.get").newBuilder()
-                .addQueryParameter("token", SLACK_AUTH_KEY)
+        HttpUrl httpUrl = HttpUrl.parse(Config.SLACK_BASE_URL + "/users.profile.get").newBuilder()
+                .addQueryParameter("token", Config.SLACK_AUTH_KEY)
                 .addQueryParameter("user", slackId)
                 .build();
         Request request = new Request.Builder()
@@ -425,34 +403,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-    }
-
-    private File createFileFromBitmap(Bitmap bmp) {
-        //create a file to write bitmap data
-        File f = new File(new File(Environment.getExternalStorageDirectory().toString()), "face.jpg");
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            Log.e("MainActivity", "Error: " + e.getLocalizedMessage());
-
-        }
-
-        //Convert bitmap to byte array
-        Bitmap bitmap = bmp;
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 50 /*ignored for PNG*/, bos);
-        byte[] bitmapdata = bos.toByteArray();
-
-        //write the bytes in
-        try {
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(bitmapdata);
-            fos.flush();
-            fos.close();
-        } catch (Exception e) {
-            Log.e("MainActivity", "Error: " + e.getLocalizedMessage());
-        }
-
-        return f;
     }
 }
