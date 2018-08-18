@@ -1,6 +1,7 @@
 package com.example.veeramanih.facecam;
 
 public class Config {
+    //Please replace with your own endpoint (this will not work).
     public static String URL = "http://192.168.145.27:6000";
 
     //Should probably hide this stuff at some point
